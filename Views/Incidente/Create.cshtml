@@ -1,0 +1,154 @@
+﻿@model SISTEMA_INTEGRAL_GISOR.Models.Incidente
+
+@{
+    ViewData["Title"] = "Reportar Incidente";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<div class="row justify-content-center g-4 mt-2">
+
+    <div class="col-lg-4">
+        <div class="glass-card">
+
+            <div class="glass-header d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div class="glass-icon mb-0" style="width: 50px; height: 50px; font-size: 1.2rem; background: rgba(255, 193, 7, 0.15); color: #ffda6a;">
+                    <i class="fa fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <h4 class="text-bright mb-0">Nuevo Reporte</h4>
+                    <p class="text-dim mb-0">Detalla el suceso</p>
+                </div>
+            </div>
+
+            <div class="glass-body">
+                <form asp-action="Create" enctype="multipart/form-data">
+
+                    <div class="mb-4">
+                        <label class="form-label text-dim fw-bold small">TIPO DE INCIDENTE</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-secondary border-opacity-50 text-muted"><i class="fa fa-list"></i></span>
+                            <select asp-for="TipoIncidenteId" class="form-select" asp-items="@(new SelectList(ViewBag.Tipos, "TipoIncidenteId", "Descripcion"))">
+                                <option value="">Seleccione una categoría...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-dim fw-bold small">DESCRIPCIÓN DETALLADA</label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="5" placeholder="Describe qué sucedió, características de los involucrados, hora aproximada..." required></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-bright fw-bold small"><i class="fa fa-camera me-1 text-danger"></i> EVIDENCIA (FOTO)</label>
+                        <div class="p-3 rounded text-center position-relative upload-area" style="border: 2px dashed rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); transition: 0.3s;">
+                            <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                            <input type="file" name="fotoEvidencia" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/*" />
+                            <p class="text-dim small mb-0">Toca para adjuntar foto</p>
+                        </div>
+                    </div>
+
+                    <input type="hidden" asp-for="Latitud" id="lat" />
+                    <input type="hidden" asp-for="Longitud" id="lng" />
+                    <input type="hidden" asp-for="UbigeoId" value="1" />
+
+                    <div class="alert alert-info bg-info bg-opacity-10 border border-info border-opacity-25 text-info d-flex align-items-center p-3 mb-4">
+                        <i class="fa fa-map-marker-alt fa-2x me-3"></i>
+                        <div class="small">
+                            <strong>Paso Obligatorio:</strong><br>
+                            Haz clic en el mapa de la derecha para marcar la ubicación exacta.
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn-glass btn-glass-warning shadow-lg py-3 fw-bold" id="btnEnviar" disabled>
+                            <i class="fa fa-paper-plane me-2"></i> REGISTRAR INCIDENTE
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="glass-card p-0 overflow-hidden h-100 position-relative" style="min-height: 600px; border: 1px solid rgba(255, 255, 255, 0.1);">
+
+            <div class="position-absolute top-0 start-0 m-3 px-3 py-2 glass-card d-inline-block" style="height: auto; z-index: 1000; background: rgba(0,0,0,0.8);">
+                <small class="text-bright"><i class="fa fa-crosshairs text-danger me-2"></i>Selecciona el punto exacto</small>
+            </div>
+
+            <div id="mapSelector" style="height: 100%; width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inicializar mapa (Centro en Trujillo)
+    var map = L.map('mapSelector').setView([-8.111, -79.028], 14);
+
+    // Mapa base claro (OpenStreetMap estándar para máxima visibilidad al reportar)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    var marker;
+
+    // Evento al hacer clic en el mapa
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        // Mover o crear marcador (Icono rojo personalizado si se desea, por ahora default azul)
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+
+        // Animación de vuelo al punto seleccionado
+        map.flyTo(e.latlng, map.getZoom());
+
+        // Asignar valores (reemplazar comas por puntos para evitar errores decimales)
+        document.getElementById('lat').value = lat.toString().replace(',', '.');
+        document.getElementById('lng').value = lng.toString().replace(',', '.');
+
+        // Habilitar botón y cambiar estilo visual
+        var btn = document.getElementById('btnEnviar');
+        btn.disabled = false;
+        btn.classList.remove('btn-glass-warning');
+        btn.classList.add('btn-glass-primary'); // Cambia a azul/verde al estar listo
+        btn.innerHTML = '<i class="fa fa-check-circle me-2"></i> LISTO PARA ENVIAR';
+    });
+
+    // Intentar obtener ubicación GPS del usuario al cargar
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+            map.setView([lat, lon], 16);
+
+            // Opcional: Crear marcador automático en mi ubicación
+            // marker = L.marker([lat, lon]).addTo(map);
+            // document.getElementById('lat').value = lat;
+            // document.getElementById('lng').value = lon;
+            // document.getElementById('btnEnviar').disabled = false;
+        });
+    }
+</script>
+
+<style>
+    .upload-area:hover {
+        border-color: #ffda6a !important;
+        background: rgba(255, 218, 106, 0.1) !important;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    /* Ajuste para inputs dentro de grupos */
+    .input-group-text {
+        border-color: rgba(255,255,255,0.1);
+    }
+</style>

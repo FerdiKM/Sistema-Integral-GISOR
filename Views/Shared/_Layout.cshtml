@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GISOR</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        /* --- CORE DARKGLASS --- */
+        body {
+            background: radial-gradient(circle at 50% 0%, #1a2a3a 0%, #000000 100%) !important;
+            background-attachment: fixed !important;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .liquid-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 100px;
+        }
+
+        /* TARJETAS DE CRISTAL */
+        .glass-card {
+            background: rgba(30, 35, 45, 0.65);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+            .glass-card:hover {
+                transform: translateY(-5px);
+                background: rgba(40, 45, 55, 0.75);
+                border-color: rgba(255, 255, 255, 0.25);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            }
+
+        /* TEXTOS Y UTILIDADES */
+        .text-bright {
+            color: #fff !important;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        .text-dim {
+            color: rgba(255,255,255,0.6) !important;
+        }
+
+        h1, h2, h3, h4 {
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* NAVBAR */
+        .navbar-glass {
+            background: rgba(15, 15, 20, 0.9) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+        }
+
+            .nav-link:hover {
+                color: #fff !important;
+            }
+
+        /* BOTONES */
+        .btn-glass {
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-glass-primary {
+            background: rgba(13, 110, 253, 0.2);
+            color: #6ea8fe;
+        }
+
+            .btn-glass-primary:hover {
+                background: rgba(13, 110, 253, 0.6);
+                color: white;
+                box-shadow: 0 0 25px rgba(13, 110, 253, 0.4);
+            }
+
+        .btn-glass-warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffda6a;
+        }
+
+            .btn-glass-warning:hover {
+                background: rgba(255, 193, 7, 0.5);
+                color: white;
+                box-shadow: 0 0 25px rgba(255, 193, 7, 0.3);
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark navbar-glass fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    <i class="fa fa-shield-alt text-info me-2"></i> GISOR
+                </a>
+                <div class="collapse navbar-collapse justify-content-end">
+                    <ul class="navbar-nav align-items-center gap-3">
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item"><a class="btn-glass btn-glass-primary py-1 px-4" style="font-size: 0.8rem;" asp-controller="Account" asp-action="Login">Ingresar</a></li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><span class="badge bg-white bg-opacity-10 text-white px-3 py-2 rounded-pill">@User.Identity.Name</span></li>
+                            <li class="nav-item"><a class="btn btn-sm btn-outline-light rounded-pill px-3" asp-controller="Account" asp-action="Logout">Salir</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="liquid-container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

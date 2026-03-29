@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-4">
+        <div class="glass-card">
+            <div class="glass-header text-center border-0 pt-4">
+                <i class="fa fa-user-circle fa-3x text-white mb-3 opacity-75"></i>
+                <h3 class="text-bright">Bienvenido</h3>
+            </div>
+            <div class="glass-body">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger bg-danger bg-opacity-25 text-white border-0">@ViewBag.Error</div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" name="correo" class="form-control" placeholder="usuario@gisor.com" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••" required />
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn-glass btn-glass-primary">
+                            Ingresar <i class="fa fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="text-center pb-4">
+                <a asp-action="Register" class="text-info text-decoration-none small">¿No tienes cuenta? Regístrate</a>
+                <br />
+                <a asp-controller="Home" asp-action="Index" class="text-muted text-decoration-none small mt-2 d-inline-block">Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+</div>

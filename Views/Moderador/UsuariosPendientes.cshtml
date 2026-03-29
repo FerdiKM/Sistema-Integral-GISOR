@@ -1,0 +1,187 @@
+﻿@model IEnumerable<SISTEMA_INTEGRAL_GISOR.Models.Usuario>
+@{
+    ViewData["Title"] = "Verificación de Identidad";
+    var ciudadanos = ViewBag.Ciudadanos as IEnumerable<SISTEMA_INTEGRAL_GISOR.Models.Ciudadano>;
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+
+        <div class="glass-card">
+
+            <div class="glass-header d-flex justify-content-between align-items-center mb-4 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="glass-icon icon-security" style="width: 50px; height: 50px; margin: 0; font-size: 1.2rem;">
+                        <i class="fa fa-users-cog"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-bright mb-0">Solicitudes de Registro</h4>
+                        <p class="text-dim mb-0">Verificación de identidad mediante DNI</p>
+                    </div>
+                </div>
+                <span class="badge bg-warning text-dark shadow-sm px-3 py-2 rounded-pill">
+                    <i class="fa fa-clock me-1"></i> @Model.Count() Pendientes
+                </span>
+            </div>
+
+            <div class="glass-body p-0">
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fa fa-check-circle fa-4x text-success opacity-50"></i>
+                        </div>
+                        <h4 class="text-bright">Todo al día</h4>
+                        <p class="text-dim">No hay usuarios pendientes de verificación.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-glass align-middle mb-0 w-100">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4 py-3 text-dim">USUARIO / CORREO</th>
+                                    <th class="py-3 text-dim">DATOS DEL CIUDADANO</th>
+                                    <th class="text-center py-3 text-dim">EVIDENCIA DNI</th>
+                                    <th class="text-end pe-4 py-3 text-dim">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var u in Model)
+                                {
+                                    var c = ciudadanos?.FirstOrDefault(x => x.UsuarioId == u.UsuarioId);
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-primary bg-opacity-25 d-flex align-items-center justify-content-center me-3"
+                                                     style="width: 40px; height: 40px; border: 1px solid rgba(13,110,253,0.3);">
+                                                    <i class="fa fa-user text-primary"></i>
+                                                </div>
+                                                <span class="text-bright fw-bold">@u.Correo</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            @if (c != null)
+                                            {
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-bright fw-bold fs-6">@c.NombreCompleto</span>
+                                                    <div class="d-flex gap-3 mt-1">
+                                                        <span class="text-dim small"><i class="fa fa-id-card me-1 text-info"></i> @c.Dni</span>
+                                                        <span class="text-dim small"><i class="fa fa-phone me-1 text-success"></i> @c.Telefono</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic small"><i class="fa fa-exclamation-circle me-1"></i> Datos no disponibles</span>
+                                            }
+                                        </td>
+                                        <td class="text-center py-3">
+                                            @if (c != null && !string.IsNullOrEmpty(c.FotoDniUrl))
+                                            {
+                                                <a href="@c.FotoDniUrl" target="_blank" class="position-relative d-inline-block hover-zoom text-decoration-none">
+                                                    <div class="rounded overflow-hidden border border-secondary border-opacity-50 shadow-sm" style="width: 100px; height: 60px;">
+                                                        <img src="@c.FotoDniUrl" class="w-100 h-100" style="object-fit: cover;" alt="DNI" />
+                                                    </div>
+                                                    <div class="position-absolute top-100 start-50 translate-middle-x mt-1">
+                                                        <span class="badge bg-dark bg-opacity-75 text-white" style="font-size: 0.6rem;">VER FOTO</span>
+                                                    </div>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2">
+                                                    <i class="fa fa-image-slash me-1"></i> Sin Foto
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-4 py-3">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <form asp-action="ActivarUsuario" method="post">
+                                                    <input type="hidden" name="id" value="@u.UsuarioId" />
+                                                    <button type="submit" class="btn btn-sm btn-glass btn-glass-success shadow-sm d-flex align-items-center gap-2" title="Aprobar y Activar">
+                                                        <i class="fa fa-check"></i> <span>Aprobar</span>
+                                                    </button>
+                                                </form>
+
+                                                <form asp-action="RechazarUsuario" method="post">
+                                                    <input type="hidden" name="id" value="@u.UsuarioId" />
+                                                    <button type="submit" class="btn btn-sm btn-glass btn-glass-danger shadow-sm d-flex align-items-center gap-2"
+                                                            onclick="return confirm('¿Rechazar y eliminar permanentemente?');"
+                                                            title="Rechazar y Eliminar">
+                                                        <i class="fa fa-trash"></i> <span>Rechazar</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <div class="p-3 border-top border-secondary border-opacity-25 mt-2">
+                <a asp-action="Index" class="btn btn-sm btn-outline-light d-inline-flex align-items-center gap-2 px-3">
+                    <i class="fa fa-arrow-left"></i> Volver al Panel
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos específicos para la tabla glass mejorada */
+    .table-glass th {
+        background-color: rgba(255, 255, 255, 0.03);
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .table-glass tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-glass-success {
+        background: rgba(25, 135, 84, 0.2);
+        color: #75b798;
+        border: 1px solid rgba(25, 135, 84, 0.3);
+        transition: all 0.2s;
+    }
+
+        .btn-glass-success:hover {
+            background: rgba(25, 135, 84, 0.6);
+            color: white;
+            box-shadow: 0 0 15px rgba(25, 135, 84, 0.4);
+            transform: translateY(-2px);
+        }
+
+    .btn-glass-danger {
+        background: rgba(220, 53, 69, 0.2);
+        color: #ea868f;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        transition: all 0.2s;
+    }
+
+        .btn-glass-danger:hover {
+            background: rgba(220, 53, 69, 0.6);
+            color: white;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
+            transform: translateY(-2px);
+        }
+
+    .hover-zoom {
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+        .hover-zoom:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+</style>

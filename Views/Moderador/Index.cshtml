@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Panel de Operaciones";
+}
+
+<div class="container mt-5">
+
+    <div class="text-center mb-5">
+        <h1 class="text-bright fw-light"><i class="fa fa-user-shield text-danger opacity-75"></i> Central de Operaciones</h1>
+        <p class="text-dim">Seleccione una categoría para gestionar</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+
+        <div class="col-md-5">
+            <a asp-action="IncidentesPendientes" class="text-decoration-none">
+                <div class="glass-card text-center h-100 hover-card p-4 border-danger border-opacity-25" style="border-left: 5px solid #dc3545;">
+                    <div class="glass-icon icon-security mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fa fa-exclamation-triangle text-danger"></i>
+                    </div>
+                    <h3 class="text-bright">Incidentes Pendientes</h3>
+                    <p class="text-dim">Validar reportes, despachar unidades y bloquear spam.</p>
+
+                    <div class="mt-4">
+                        @if (ViewBag.CantIncidentes > 0)
+                        {
+                            <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm fs-6 animate-pulse">
+                                @ViewBag.CantIncidentes Alertas Nuevas
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-3 py-2 border border-success">
+                                <i class="fa fa-check"></i> Todo al día
+                            </span>
+                        }
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-5">
+            <a asp-action="UsuariosPendientes" class="text-decoration-none">
+                <div class="glass-card text-center h-100 hover-card p-4 border-warning border-opacity-25" style="border-left: 5px solid #ffc107;">
+                    <div class="glass-icon icon-door mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fa fa-id-card text-warning"></i>
+                    </div>
+                    <h3 class="text-bright">Verificar Usuarios</h3>
+                    <p class="text-dim">Revisar fotos de DNI y activar cuentas nuevas.</p>
+
+                    <div class="mt-4">
+                        @if (ViewBag.CantUsuarios > 0)
+                        {
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm fs-6">
+                                @ViewBag.CantUsuarios Solicitudes
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-3 py-2 border border-success">
+                                <i class="fa fa-check"></i> Todo al día
+                            </span>
+                        }
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.3s ease, background 0.3s;
+    }
+
+        .hover-card:hover {
+            transform: translateY(-10px);
+            background: rgba(40, 45, 55, 0.9);
+        }
+
+    @@keyframes pulse-red {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse-red 2s infinite;
+    }
+</style>

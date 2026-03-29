@@ -1,0 +1,114 @@
+﻿@model SISTEMA_INTEGRAL_GISOR.Models.Usuario
+@{
+    ViewData["Title"] = "Mi Perfil";
+    var ciudadano = ViewBag.Ciudadano as SISTEMA_INTEGRAL_GISOR.Models.Ciudadano;
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="glass-card">
+
+            <div class="glass-header d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div class="glass-icon mb-0" style="width: 50px; height: 50px; font-size: 1.2rem; background: rgba(108, 117, 125, 0.2); color: #ced4da;">
+                    <i class="fa fa-user-cog"></i>
+                </div>
+                <div>
+                    <h4 class="text-bright mb-0">Configuración de Cuenta</h4>
+                    <p class="text-dim mb-0">Gestiona tu perfil y seguridad</p>
+                </div>
+            </div>
+
+            <div class="glass-body text-center">
+
+                <div class="mb-4 position-relative d-inline-block">
+                    @if (ciudadano != null && !string.IsNullOrEmpty(ciudadano.FotoDniUrl))
+                    {
+                        <div class="profile-glow">
+                            <img src="@ciudadano.FotoDniUrl" class="rounded-circle" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid rgba(255,255,255,0.1);" alt="Foto Perfil" />
+                        </div>
+                        <div class="position-absolute bottom-0 end-0">
+                            <span class="badge rounded-circle bg-success border border-dark p-2" title="Verificado">
+                                <i class="fa fa-check text-white"></i>
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-white bg-opacity-10 d-flex align-items-center justify-content-center mx-auto" style="width: 140px; height: 140px;">
+                            <i class="fa fa-user fa-4x text-dim"></i>
+                        </div>
+                    }
+                </div>
+
+                <h2 class="text-bright fw-light mb-1">
+                    @(ciudadano?.NombreCompleto ?? "Usuario")
+                </h2>
+                <p class="text-info opacity-75 mb-3">@Model.Correo</p>
+
+                <div class="d-flex justify-content-center gap-3 mb-5">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
+                        <i class="fa fa-shield-alt me-1"></i> Cuenta Verificada
+                    </span>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 rounded-pill">
+                        <i class="fa fa-map-marker-alt me-1"></i> ID: @(ciudadano?.CiudadanoId ?? 0)
+                    </span>
+                </div>
+
+                <hr class="border-secondary border-opacity-25 my-4">
+
+                <div class="d-grid gap-3">
+
+                    <a asp-action="Logout" class="btn-glass btn-glass-primary">
+                        <i class="fa fa-sign-out-alt"></i> Cerrar Sesión
+                    </a>
+
+                    <button type="button" class="btn-glass btn-glass-danger mt-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="fa fa-trash-alt"></i> Eliminar mi Cuenta
+                    </button>
+
+                    <p class="text-dim small mt-2">
+                        <i class="fa fa-info-circle me-1"></i> Eliminar tu cuenta borrará todo tu historial de reportes.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary border-opacity-50 shadow-lg">
+            <div class="modal-header border-secondary border-opacity-25">
+                <h5 class="modal-title text-danger"><i class="fa fa-exclamation-triangle me-2"></i> Zona de Peligro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <i class="fa fa-user-times fa-4x text-danger mb-3 opacity-50"></i>
+                <h4 class="text-white">¿Estás absolutamente seguro?</h4>
+                <p class="text-muted">Esta acción es <strong>irreversible</strong>. Se eliminarán tus datos personales y tu historial de incidentes de forma permanente.</p>
+            </div>
+            <div class="modal-footer border-secondary border-opacity-25 justify-content-center">
+                <button type="button" class="btn btn-outline-light px-4" data-bs-dismiss="modal">Cancelar</button>
+                <form asp-action="DeleteAccount" method="post">
+                    <button type="submit" class="btn btn-danger px-4">Sí, eliminar todo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-glow img {
+        box-shadow: 0 0 30px rgba(13, 202, 240, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .profile-glow:hover img {
+        transform: scale(1.05);
+        box-shadow: 0 0 40px rgba(13, 202, 240, 0.4);
+        border-color: rgba(13, 202, 240, 0.5) !important;
+    }
+</style>

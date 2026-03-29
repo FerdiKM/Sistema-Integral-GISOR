@@ -1,0 +1,277 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<div class="text-center">
+
+    @if (User.IsInRole("Administrador"))
+    {
+        <div class="mt-5 container">
+            <div class="glass-card mx-auto" style="max-width: 600px;">
+                <div class="glass-body">
+                    <i class="fa fa-user-tie fa-4x text-info mb-3"></i>
+                    <h3 class="text-bright">Bienvenido, Administrador</h3>
+                    <p class="text-dim">Panel de control estratégico operativo.</p>
+                    <a asp-controller="Admin" asp-action="Index" class="btn-glass btn-glass-primary mt-3">
+                        <i class="fa fa-chart-line"></i> Ir al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (User.IsInRole("Moderador"))
+    {
+        <div class="mt-5 container">
+            <div class="glass-card mx-auto" style="max-width: 600px; border-color: rgba(220, 53, 69, 0.3);">
+                <div class="glass-body">
+                    <i class="fa fa-user-shield fa-4x text-danger mb-3"></i>
+                    <h3 class="text-bright">Panel de Operaciones</h3>
+                    <p class="text-dim">Gestión de alertas y validación en tiempo real.</p>
+                    <a asp-controller="Moderador" asp-action="Index" class="btn-glass btn-glass-danger mt-3">
+                        <i class="fa fa-gavel"></i> Iniciar Turno
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (User.Identity.IsAuthenticated)
+    {
+        <div class="container mt-4">
+            <div class="text-start mb-4">
+                <h2 class="text-bright font-weight-light">Hola, <span class="fw-bold">@User.Identity.Name</span></h2>
+            </div>
+
+            <div class="glass-card mb-5 p-4 d-flex flex-wrap align-items-center justify-content-center justify-content-md-between gap-3"
+                 style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.3);">
+                <div class="text-center text-md-start">
+                    <h3 class="text-danger fw-bold mb-0"><i class="fa fa-broadcast-tower"></i> ALERTA SOS</h3>
+                    <p class="text-dim mb-0">Envío de ubicación prioritaria.</p>
+                </div>
+                <button id="btnSOS_Reg" class="rounded-circle shadow-lg d-flex align-items-center justify-content-center mx-auto mx-md-0 btn-sos-action"
+                        style="width: 90px; height: 90px; background: linear-gradient(145deg, #ff3b30, #d32f2f); border: 4px solid rgba(255,255,255,0.2); color: white; font-weight: bold; font-size: 1.5rem;">
+                    SOS
+                </button>
+            </div>
+            <div id="statusMessageReg" class="alert mt-2 d-none"></div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <a asp-controller="Incidente" asp-action="Create" class="text-decoration-none">
+                        <div class="glass-card text-center h-100 btn-glass-wrapper">
+                            <div class="glass-body">
+                                <i class="fa fa-bullhorn fa-3x text-warning mb-3"></i>
+                                <h4 class="text-bright">Reportar</h4>
+                                <p class="text-dim small">Nuevo incidente</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a asp-controller="Incidente" asp-action="Index" class="text-decoration-none">
+                        <div class="glass-card text-center h-100 btn-glass-wrapper">
+                            <div class="glass-body">
+                                <i class="fa fa-map-marked-alt fa-3x text-info mb-3"></i>
+                                <h4 class="text-bright">Mapa</h4>
+                                <p class="text-dim small">Ver zonas</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a asp-controller="Incidente" asp-action="MisReportes" class="text-decoration-none">
+                        <div class="glass-card text-center h-100 btn-glass-wrapper">
+                            <div class="glass-body">
+                                <i class="fa fa-list-alt fa-3x text-success mb-3"></i>
+                                <h4 class="text-bright">Historial</h4>
+                                <p class="text-dim small">Mis alertas</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a asp-controller="Account" asp-action="Profile" class="text-decoration-none">
+                        <div class="glass-card text-center h-100 btn-glass-wrapper">
+                            <div class="glass-body">
+                                <i class="fa fa-user-cog fa-3x text-secondary mb-3"></i>
+                                <h4 class="text-bright">Cuenta</h4>
+                                <p class="text-dim small">Configuración</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="mt-4 mb-5">
+            <h1 class="display-3 fw-bold text-white mb-2" style="text-shadow: 0 0 30px rgba(13, 110, 253, 0.5);">GISOR</h1>
+            <p class="text-dim fs-5">Plataforma de Seguridad Ciudadana</p>
+        </div>
+
+        <div class="d-flex flex-column align-items-center justify-content-center mb-5 py-4">
+
+            <h2 class="text-danger fw-bold mb-4 animate-pulse-text" style="text-shadow: 0 0 20px rgba(220, 53, 69, 0.8);">¿EMERGENCIA EN CURSO?</h2>
+
+            <button id="btnSOS" class="rounded-circle shadow-lg mb-3 d-flex align-items-center justify-content-center btn-sos-glow"
+                    style="width: 180px; height: 180px; background: linear-gradient(145deg, #ff3b30, #b00020); color: white; font-size: 2.5rem; border: none; cursor: pointer;">
+                <span class="fw-bold text-white" style="text-shadow: 0 2px 5px rgba(0,0,0,0.5);">SOS</span>
+            </button>
+
+            <p class="text-white opacity-75 mt-3 fs-5">Presiona para enviar ubicación inmediata</p>
+            <div id="statusMessage" class="alert alert-dark mt-3 d-none w-50"></div>
+        </div>
+
+        <h3 class="mb-4 text-bright">Reportar es fácil y seguro</h3>
+
+        <div class="row g-4 text-start mb-5 justify-content-center">
+            <div class="col-md-4">
+                <div class="glass-card h-100">
+                    <div class="glass-icon" style="background: rgba(13, 202, 240, 0.15); color: #0dcaf0;">
+                        <i class="fa fa-pen"></i>
+                    </div>
+                    <h4 class="text-bright">1. Detalla</h4>
+                    <p class="text-dim small">Describe el suceso y sube fotos.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card h-100">
+                    <div class="glass-icon" style="background: rgba(13, 110, 253, 0.15); color: #0d6efd;">
+                        <i class="fa fa-map-marker-alt"></i>
+                    </div>
+                    <h4 class="text-bright">2. Ubica</h4>
+                    <p class="text-dim small">Marca el punto en el mapa.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card h-100" style="background: rgba(255, 193, 7, 0.05); border-color: rgba(255, 193, 7, 0.2);">
+                    <div class="glass-icon" style="background: rgba(255, 193, 7, 0.15); color: #ffda6a;">
+                        <i class="fa fa-user-check"></i>
+                    </div>
+                    <h4 class="text-bright">3. Validación</h4>
+                    <p class="text-dim small">Un moderador revisará tu reporte.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5 justify-content-center">
+            <div class="col-md-5">
+                <a asp-controller="Incidente" asp-action="Create" class="btn-glass btn-glass-warning w-100 py-3 shadow-lg transform-hover">
+                    <i class="fa fa-bullhorn fa-lg me-2"></i> REPORTAR (ANÓNIMO)
+                </a>
+            </div>
+            <div class="col-md-5">
+                <a asp-controller="Incidente" asp-action="Index" class="btn-glass btn-glass-primary w-100 py-3 shadow-lg transform-hover">
+                    <i class="fa fa-globe-americas fa-lg me-2"></i> VER MAPA GLOBAL
+                </a>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="glass-card p-4 text-start d-flex align-items-center gap-4" style="background: rgba(25, 135, 84, 0.15); border: 1px solid rgba(25, 135, 84, 0.3);">
+                    <i class="fa fa-user-shield fa-4x text-success opacity-75 d-none d-md-block"></i>
+                    <div>
+                        <h4 class="text-bright mb-2">Tu privacidad es primero</h4>
+                        <p class="text-dim mb-0">
+                            Tus datos son encriptados y protegidos bajo la
+                            <strong class="text-white">Ley N° 29733 de Protección de Datos Personales</strong>.
+                            <a asp-controller="Account" asp-action="Register" class="text-info text-decoration-none ms-1 hover-glow">Crear una cuenta segura <i class="fa fa-arrow-right"></i></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function activarSOS(botonId, msgId) {
+        var btn = document.getElementById(botonId);
+        if (btn) {
+            btn.addEventListener("click", function () {
+                var msg = document.getElementById(msgId);
+
+                if (navigator.geolocation) {
+                    var originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+                    btn.disabled = true;
+
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var lat = position.coords.latitude;
+                        var lon = position.coords.longitude;
+                        var url = '/Home/EnviarSOS?lat=' + lat.toString().replace(',', '.') + '&lon=' + lon.toString().replace(',', '.');
+
+                        fetch(url, { method: 'POST' }).then(r => r.json()).then(d => {
+                            if(msg) {
+                                msg.classList.remove("d-none", "alert-danger", "alert-success");
+                                msg.classList.add(d.success ? "alert-success" : "alert-danger");
+                                msg.innerHTML = (d.success ? '<i class="fa fa-check-circle"></i> ' : '<i class="fa fa-exclamation-triangle"></i> ') + d.message;
+                                msg.classList.remove("d-none");
+                            } else {
+                                alert(d.message);
+                            }
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        });
+                    }, function() {
+                        alert("Error: Necesitamos acceso a tu ubicación.");
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
+                } else { alert("GPS no soportado."); }
+            });
+        }
+    }
+
+    // Inicializar listeners
+    activarSOS("btnSOS", "statusMessage");
+    activarSOS("btnSOS_Reg", "statusMessageReg");
+</script>
+
+<style>
+    /* Animación de pulso roja intensa para el SOS */
+    @@keyframes pulse-red-glow {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);
+            transform: scale(1);
+        }
+
+        70% {
+            box-shadow: 0 0 0 20px rgba(255, 59, 48, 0);
+            transform: scale(1.05);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
+            transform: scale(1);
+        }
+    }
+
+    .btn-sos-glow {
+        animation: pulse-red-glow 2s infinite;
+        transition: transform 0.2s;
+    }
+
+        .btn-sos-glow:active {
+            transform: scale(0.95);
+            background: #b00020;
+        }
+
+    .btn-glass-wrapper:hover {
+        background: rgba(255,255,255,0.05);
+        transform: translateY(-5px);
+        transition: 0.3s;
+    }
+
+    .transform-hover:hover {
+        transform: scale(1.02);
+    }
+
+    .hover-glow:hover {
+        text-shadow: 0 0 8px rgba(13, 202, 240, 0.6);
+        color: #fff !important;
+    }
+</style>

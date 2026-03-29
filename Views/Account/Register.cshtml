@@ -1,0 +1,184 @@
+﻿@model SISTEMA_INTEGRAL_GISOR.Models.Ciudadano
+@{
+    ViewData["Title"] = "Registro de Usuario";
+}
+
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-lg-10">
+
+        <div class="glass-card">
+
+            <div class="glass-header d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div class="glass-icon mb-0" style="width: 50px; height: 50px; font-size: 1.2rem; background: rgba(255, 193, 7, 0.15); color: #ffda6a;">
+                    <i class="fa fa-user-plus"></i>
+                </div>
+                <div>
+                    <h4 class="text-bright mb-0">Crear Cuenta Segura</h4>
+                    <p class="text-dim mb-0">Únete a la red de seguridad ciudadana</p>
+                </div>
+            </div>
+
+            <div class="glass-body">
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger bg-danger bg-opacity-10 border border-danger border-opacity-25 text-white mb-4 shadow-sm">
+                        <i class="fa fa-times-circle me-2"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <form asp-action="Register" method="post" enctype="multipart/form-data">
+                    <div class="row g-5">
+
+                        <div class="col-md-6 border-end border-secondary border-opacity-25 position-relative register-divider">
+                            <h5 class="text-info mb-4 d-flex align-items-center">
+                                <i class="fa fa-lock me-2 opacity-75"></i> Credenciales de Acceso
+                            </h5>
+
+                            <div class="mb-3">
+                                <label class="form-label text-dim small fw-bold">CORREO ELECTRÓNICO</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-secondary border-opacity-50 text-muted"><i class="fa fa-envelope"></i></span>
+                                    <input type="email" name="usuario.Correo" class="form-control" placeholder="nombre@ejemplo.com" required />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-dim small fw-bold">CONTRASEÑA</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-secondary border-opacity-50 text-muted"><i class="fa fa-key"></i></span>
+                                    <input type="password" name="usuario.Password" class="form-control" placeholder="Mínimo 6 caracteres" required />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-dim small fw-bold">CONFIRMAR CONTRASEÑA</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-secondary border-opacity-50 text-muted"><i class="fa fa-check-double"></i></span>
+                                    <input type="password" name="passwordConfirm" class="form-control" placeholder="Repite tu contraseña" required />
+                                </div>
+                            </div>
+
+                            <div class="mt-4 p-3 rounded" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="form-check">
+                                    <input class="form-check-input bg-dark border-secondary" type="checkbox" id="terms" required>
+                                    <label class="form-check-label text-dim small" for="terms">
+                                        Acepto los términos y el tratamiento de datos personales según la <strong>Ley N° 29733</strong>.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="text-warning mb-4 d-flex align-items-center">
+                                <i class="fa fa-id-card me-2 opacity-75"></i> Verificación de Identidad
+                            </h5>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label text-dim small fw-bold">DNI (8 DÍGITOS)</label>
+                                    <input asp-for="Dni" class="form-control text-center letter-spacing-2" maxlength="8" placeholder="00000000" required pattern="\d{8}" title="Debe contener 8 números" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-dim small fw-bold">TELÉFONO</label>
+                                    <input asp-for="Telefono" class="form-control text-center" placeholder="999..." required />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-dim small fw-bold">NOMBRE COMPLETO</label>
+                                <input asp-for="NombreCompleto" class="form-control" placeholder="Nombres y Apellidos" required />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label text-dim small fw-bold">CIUDAD / UBIGEO</label>
+                                <select asp-for="UbigeoId" class="form-select">
+                                    <option value="1">General / Desconocido</option>
+                                    <option value="2">Trujillo</option>
+                                    <option value="4">Lima</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label text-bright fw-bold"><i class="fa fa-camera me-1 text-danger"></i> Evidencia (Foto Rostro + DNI)</label>
+                                <div class="p-4 rounded text-center border-dashed position-relative upload-area">
+                                    <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                    <input type="file" name="fotoDni" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/*" required />
+                                    <p class="text-dim small mb-0">Haz clic o arrastra tu foto aquí.</p>
+                                    <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">Obligatorio para validar tu cuenta</small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-5 pt-4 border-top border-secondary border-opacity-10 align-items-center">
+                        <div class="col-md-6 order-md-1 order-2 text-center text-md-start mt-3 mt-md-0">
+                            <a asp-action="Login" class="text-decoration-none text-dim hover-text-white transition-03">
+                                <i class="fa fa-arrow-left me-1"></i> Ya tengo cuenta
+                            </a>
+                        </div>
+                        <div class="col-md-6 order-md-2 order-1">
+                            <button type="submit" class="btn-glass btn-glass-warning shadow-lg py-3 fw-bold w-100">
+                                <i class="fa fa-check-circle me-2"></i> SOLICITAR REGISTRO
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Estilos específicos para esta vista */
+    .register-divider {
+        border-right: 1px solid rgba(255,255,255,0.1) !important;
+    }
+
+    @@media (max-width: 768px) {
+        .register-divider
+
+    {
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    }
+
+    .border-dashed {
+        border: 2px dashed rgba(255,255,255,0.2);
+        background: rgba(0,0,0,0.2);
+        transition: all 0.3s;
+    }
+
+    .upload-area:hover, .upload-area:focus-within {
+        border-color: #ffda6a;
+        background: rgba(255, 218, 106, 0.05);
+    }
+
+    .letter-spacing-2 {
+        letter-spacing: 2px;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .transition-03 {
+        transition: 0.3s;
+    }
+
+    .hover-text-white:hover {
+        color: white !important;
+    }
+
+    /* Input groups transparentes para fusionarse con el tema */
+    .input-group-text {
+        border-color: rgba(255,255,255,0.1);
+    }
+</style>

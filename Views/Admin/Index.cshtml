@@ -1,0 +1,230 @@
+﻿@model IEnumerable<SISTEMA_INTEGRAL_GISOR.Models.Incidente>
+@{
+    ViewData["Title"] = "Dashboard Estratégico";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<div class="container-fluid mt-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="text-bright fw-light mb-0"><i class="fa fa-chart-pie text-info me-2"></i> Dashboard Estratégico</h2>
+            <p class="text-dim mb-0">Métricas globales de seguridad ciudadana</p>
+        </div>
+        <button class="btn btn-sm btn-glass btn-glass-primary" style="width: auto;" onclick="window.print()">
+            <i class="fa fa-download me-2"></i> Reporte PDF
+        </button>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-card d-flex align-items-center justify-content-between p-4" style="border-left: 4px solid #4e73df;">
+                <div>
+                    <div class="text-dim text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Total Incidentes</div>
+                    <div class="text-bright fw-bold h2 mb-0">@ViewBag.TotalIncidentes</div>
+                </div>
+                <div class="glass-icon mb-0" style="background: rgba(78, 115, 223, 0.15); color: #4e73df; width: 50px; height: 50px; font-size: 1.2rem;">
+                    <i class="fas fa-calendar"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-card d-flex align-items-center justify-content-between p-4" style="border-left: 4px solid #f6c23e;">
+                <div>
+                    <div class="text-dim text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Por Moderar</div>
+                    <div class="text-bright fw-bold h2 mb-0">@ViewBag.IncidentesPendientes</div>
+                </div>
+                <div class="glass-icon mb-0" style="background: rgba(246, 194, 62, 0.15); color: #f6c23e; width: 50px; height: 50px; font-size: 1.2rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-card d-flex align-items-center justify-content-between p-4" style="border-left: 4px solid #1cc88a;">
+                <div>
+                    <div class="text-dim text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Ciudadanos</div>
+                    <div class="text-bright fw-bold h2 mb-0">@ViewBag.TotalUsuarios</div>
+                </div>
+                <div class="glass-icon mb-0" style="background: rgba(28, 200, 138, 0.15); color: #1cc88a; width: 50px; height: 50px; font-size: 1.2rem;">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-card d-flex align-items-center justify-content-between p-4" style="border-left: 4px solid #e74a3b;">
+                <div>
+                    <div class="text-dim text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Pendientes Validación</div>
+                    <div class="text-bright fw-bold h2 mb-0">@ViewBag.UsuariosInactivos</div>
+                </div>
+                <div class="glass-icon mb-0" style="background: rgba(231, 74, 59, 0.15); color: #e74a3b; width: 50px; height: 50px; font-size: 1.2rem;">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        
+        <div class="col-lg-5">
+            <div class="glass-card h-100">
+                <div class="glass-header d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 text-bright">Tipos de Incidentes</h6>
+                    <i class="fa fa-chart-pie text-dim"></i>
+                </div>
+                <div class="glass-body d-flex justify-content-center align-items-center" style="min-height: 300px;">
+                    <div style="width: 100%; max-width: 350px;">
+                        <canvas id="myPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="glass-card h-100">
+                <div class="glass-header d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 text-bright">Distritos con Mayor Incidencia</h6>
+                    <i class="fa fa-chart-bar text-dim"></i>
+                </div>
+                <div class="glass-body">
+                    <div style="height: 300px;">
+                        <canvas id="myBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card">
+                <div class="glass-header d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 text-bright"><i class="fa fa-globe-americas me-2 text-success"></i> Distribución Geoespacial</h6>
+                    <span class="badge bg-success bg-opacity-25 text-success">En tiempo real</span>
+                </div>
+                <div class="glass-body p-0">
+                    <div id="adminMap" style="height: 500px; width: 100%; border-radius: 0 0 20px 20px; background-color: #fff;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // 1. CONFIGURACIÓN CHART.JS (MODO OSCURO PARA GRÁFICOS)
+    // ==========================================
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+    // --- GRÁFICO DE PASTEL ---
+    var ctxPie = document.getElementById("myPieChart");
+    var myPieChart = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.LabelsTipo)),
+            datasets: [{
+                data: @Html.Raw(Json.Serialize(ViewBag.DataTipo)),
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true, color: '#fff' }
+                }
+            },
+            cutout: '70%',
+        },
+    });
+
+    // --- GRÁFICO DE BARRAS ---
+    var ctxBar = document.getElementById("myBarChart");
+    var myBarChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.LabelsDistrito)),
+            datasets: [{
+                label: "Incidentes",
+                backgroundColor: "rgba(78, 115, 223, 0.5)",
+                borderColor: "#4e73df",
+                borderWidth: 2,
+                borderRadius: 5,
+                data: @Html.Raw(Json.Serialize(ViewBag.DataDistrito)),
+                barThickness: 40,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#fff' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#fff' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        },
+    });
+
+    // ==========================================
+    // 2. CONFIGURACIÓN LEAFLET (MAPA CLARO)
+    // ==========================================
+    var map = L.map('adminMap').setView([-8.111, -79.028], 13);
+
+    // USAMOS EL MAPA ESTÁNDAR (BLANCO/CLARO) DE OPENSTREETMAP
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Datos desde C#
+    var incidentes = @Html.Raw(Json.Serialize(Model.Select(x => new { 
+        lat = x.Latitud, 
+        lng = x.Longitud, 
+        desc = x.Descripcion,
+        fecha = x.FechaHora.ToString("dd/MM HH:mm"),
+        tipo = x.Descripcion.Contains("PENDIENTE") ? "warn" : "ok"
+    })));
+
+    incidentes.forEach(function(item) {
+        var lat = parseFloat(item.lat.toString().replace(',', '.'));
+        var lng = parseFloat(item.lng.toString().replace(',', '.'));
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            var color = item.tipo === "warn" ? "gold" : "#007bff"; // Azul fuerte para resaltar en blanco
+            
+            L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: color,
+                color: "#333", // Borde oscuro para contraste en mapa claro
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map)
+            .bindPopup(`
+                <div style='color: #333; text-align:center;'>
+                    <strong>${item.fecha}</strong><br>
+                    ${item.desc}
+                </div>
+            `);
+        }
+    });
+</script>

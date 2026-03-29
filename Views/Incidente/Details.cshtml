@@ -1,0 +1,130 @@
+﻿@model SISTEMA_INTEGRAL_GISOR.Models.Incidente
+
+@{
+    ViewData["Title"] = "Detalle del Incidente";
+    var evidencias = ViewBag.Evidencias as IEnumerable<SISTEMA_INTEGRAL_GISOR.Models.Evidencium>;
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<div class="row mt-4 mb-5 g-4 justify-content-center">
+
+    <div class="col-lg-5">
+        <div class="glass-card h-100 d-flex flex-column">
+
+            <div class="glass-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="glass-icon mb-0" style="width: 45px; height: 45px; font-size: 1rem; background: rgba(13, 202, 240, 0.15); color: #0dcaf0;">
+                        <i class="fa fa-file-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-bright mb-0">Expediente #@Model.IncidenteId</h5>
+                        <p class="text-dim mb-0 small">Detalles del reporte</p>
+                    </div>
+                </div>
+                <span class="badge bg-warning text-dark border border-warning border-opacity-50">
+                    <i class="fa fa-clock me-1"></i> @Model.FechaHora.ToString("dd/MM/yy HH:mm")
+                </span>
+            </div>
+
+            <div class="glass-body flex-grow-1">
+                <h6 class="text-info text-uppercase small fw-bold mb-3"><i class="fa fa-align-left me-2"></i> Descripción de los hechos</h6>
+                <div class="p-3 rounded mb-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                    <p class="text-bright mb-0" style="font-size: 1.1rem; line-height: 1.6;">
+                        @Model.Descripcion
+                    </p>
+                </div>
+
+                <hr class="border-secondary border-opacity-25 my-4">
+
+                <h6 class="text-danger text-uppercase small fw-bold mb-3"><i class="fa fa-camera me-2"></i> Evidencia Multimedia</h6>
+
+                @if (evidencias != null && evidencias.Any())
+                {
+                    <div class="row g-3">
+                        @foreach (var evi in evidencias)
+                        {
+                            <div class="col-6">
+                                <a href="@evi.UrlArchivo" target="_blank" class="d-block position-relative hover-zoom rounded overflow-hidden shadow-sm" style="border: 2px solid rgba(255,255,255,0.1);">
+                                    <img src="@evi.UrlArchivo" class="w-100" style="height: 150px; object-fit: cover;" alt="Evidencia">
+                                    <div class="position-absolute top-50 start-50 translate-middle opacity-0 hover-opacity-100">
+                                        <i class="fa fa-search-plus fa-2x text-white drop-shadow"></i>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-dark bg-opacity-25 border border-secondary border-opacity-25 text-center py-4">
+                        <i class="fa fa-image-slash fa-2x text-muted mb-2"></i>
+                        <p class="text-dim mb-0 small">No se adjuntaron evidencias visuales.</p>
+                    </div>
+                }
+            </div>
+
+            <div class="p-3 border-top border-secondary border-opacity-25 mt-auto">
+                <a href="javascript:history.back()" class="btn btn-sm btn-outline-light d-inline-flex align-items-center gap-2 px-3 border-0 opacity-75 hover-opacity-100">
+                    <i class="fa fa-arrow-left"></i> Regresar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="glass-card p-0 overflow-hidden h-100 position-relative" style="min-height: 500px; border: 1px solid rgba(13, 202, 240, 0.3); box-shadow: 0 0 40px rgba(13, 202, 240, 0.1);">
+
+            <div class="position-absolute top-0 start-0 m-3 px-3 py-2 glass-card d-inline-block" style="height: auto; z-index: 1000; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);">
+                <small class="text-bright fw-bold text-uppercase"><i class="fa fa-map-marker-alt text-info me-2"></i>Lugar del Suceso</small>
+            </div>
+
+            <div id="mapDetalle" style="height: 100%; width: 100%;"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Inicializar mapa centrado en el incidente
+    var lat = @Model.Latitud.ToString().Replace(',', '.');
+    var lng = @Model.Longitud.ToString().Replace(',', '.');
+
+    var map = L.map('mapDetalle').setView([lat, lng], 16);
+
+    // Mapa base claro (OpenStreetMap) para máximo contraste
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    // Marcador personalizado
+    var icon = L.divIcon({
+        className: 'custom-pin',
+        html: `<div style="background-color: #0dcaf0; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #0dcaf0;"></div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+
+    L.marker([lat, lng], { icon: icon }).addTo(map)
+        .bindPopup('<div class="text-center text-dark"><strong>Punto Exacto</strong><br>Lat: ' + lat + '<br>Lon: ' + lng + '</div>')
+        .openPopup();
+</script>
+
+<style>
+    .hover-zoom img {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-zoom:hover img {
+        transform: scale(1.1);
+    }
+
+    .drop-shadow {
+        filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+    }
+
+    .hover-opacity-100:hover {
+        opacity: 1 !important;
+    }
+</style>

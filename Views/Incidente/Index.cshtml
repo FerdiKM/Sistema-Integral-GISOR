@@ -1,0 +1,191 @@
+﻿@model IEnumerable<SISTEMA_INTEGRAL_GISOR.Models.Incidente>
+
+@{
+    ViewData["Title"] = "Mapa del Delito";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<div class="container-fluid" style="height: 85vh; margin-top: 20px;">
+    <div class="row h-100 g-4">
+        
+        <div class="col-lg-4 h-100 d-flex flex-column">
+            <div class="glass-card d-flex flex-column overflow-hidden h-100">
+                
+                <div class="p-4 border-bottom border-secondary border-opacity-25 bg-dark bg-opacity-25">
+                    <h3 class="text-bright mb-1"><i class="fa fa-map-marked-alt text-info me-2"></i> Radar de Seguridad</h3>
+                    <p class="text-dim small mb-3">Incidentes verificados en tiempo real.</p>
+                    
+                    <form asp-action="Index" method="get">
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-white bg-opacity-10 text-white"><i class="fa fa-search"></i></span>
+                            <input type="text" name="busqueda" class="form-control border-0 bg-white bg-opacity-10 text-white placeholder-dim" placeholder="Buscar zona, delito..." style="backdrop-filter: blur(5px);">
+                            <button class="btn btn-glass-primary px-3" type="submit" style="width: auto; border-radius: 0 10px 10px 0;">IR</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex-grow-1 overflow-auto custom-scroll p-0">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5 opacity-50">
+                            <i class="fa fa-radar fa-3x text-dim mb-3"></i>
+                            <p class="text-dim">No se encontraron incidentes en esta zona.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <div class="incident-item p-3 border-bottom border-secondary border-opacity-10" 
+                                 onclick="centrarMapa(@item.Latitud.ToString().Replace(',','.'), @item.Longitud.ToString().Replace(',','.'))" 
+                                 style="cursor: pointer; transition: 0.2s;">
+                                
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill" style="font-size: 0.7rem;">
+                                        #@item.IncidenteId
+                                    </span>
+                                    <small class="text-dim font-monospace">@item.FechaHora.ToString("HH:mm dd/MM")</small>
+                                </div>
+                                
+                                <h6 class="text-bright mb-1 text-truncate">@item.Descripcion</h6>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-dim"><i class="fa fa-map-pin me-1"></i> Ver ubicación</small>
+                                    <a asp-action="Details" asp-route-id="@item.IncidenteId" class="btn btn-sm btn-outline-light rounded-pill px-3" style="font-size: 0.7rem;">
+                                        Detalles
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                
+                <div class="p-3 border-top border-secondary border-opacity-25 bg-dark bg-opacity-25 text-center">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-dim hover-text-white small">
+                        <i class="fa fa-chevron-left me-1"></i> Volver al Menú Principal
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 h-100">
+            <div class="glass-card p-0 h-100 position-relative overflow-hidden" style="border: 1px solid rgba(0, 212, 255, 0.3); box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);">
+                
+                <div id="mapGlobal" style="height: 100%; width: 100%; background: #1a1a1a;"></div>
+                
+                <div class="position-absolute bottom-0 end-0 m-4 p-3 glass-card" style="width: auto; height: auto; z-index: 1000; background: rgba(0,0,0,0.8);">
+                    <h6 class="text-bright small mb-2 text-uppercase fw-bold">Simbología</h6>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="d-inline-block rounded-circle me-2" style="width: 10px; height: 10px; background: #00d4ff; box-shadow: 0 0 10px #00d4ff;"></span>
+                        <small class="text-dim">Verificado</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="d-inline-block rounded-circle me-2" style="width: 10px; height: 10px; background: #ffc107; box-shadow: 0 0 10px #ffc107;"></span>
+                        <small class="text-dim">En Revisión</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Inicializar Mapa (Estilo DarkMatter para look Sci-Fi)
+    var map = L.map('mapGlobal', {
+        zoomControl: false // Quitamos zoom por defecto para ponerlo nosotros si queremos, o dejarlo limpio
+    }).setView([-8.111, -79.028], 13);
+
+    // Controles de zoom abajo a la derecha
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    // Capa Oscura (CartoDB DarkMatter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // 2. Datos desde C#
+    var incidentes = @Html.Raw(Json.Serialize(Model.Select(x => new { 
+        lat = x.Latitud, 
+        lng = x.Longitud, 
+        desc = x.Descripcion, 
+        id = x.IncidenteId,
+        fecha = x.FechaHora.ToString("dd/MM HH:mm"),
+        esPendiente = x.Descripcion.Contains("PENDIENTE")
+    })));
+
+    // 3. Pintar Marcadores de Neón
+    incidentes.forEach(function(item) {
+        var lat = parseFloat(item.lat.toString().replace(',', '.'));
+        var lng = parseFloat(item.lng.toString().replace(',', '.'));
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            
+            // Color Neón: Cyan para confirmados, Amarillo para pendientes
+            var colorHex = item.esPendiente ? "#ffc107" : "#00d4ff";
+            
+            var marker = L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: colorHex,
+                color: "#fff",     // Borde blanco fino
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.7   // Translúcido
+            }).addTo(map);
+
+            // Popup oscuro
+            var popupContent = `
+                <div style="color: #333; text-align: center; min-width: 150px;">
+                    <strong style="color: #000;">INCIDENTE #${item.id}</strong><br>
+                    <span style="font-size: 0.8rem; color: #555;">${item.fecha}</span>
+                    <hr style="margin: 5px 0;">
+                    <p style="margin: 0; font-size: 0.9rem;">${item.desc.substring(0,50)}...</p>
+                    <a href="/Incidente/Details/${item.id}" class="btn btn-sm btn-dark text-white mt-2 w-100" style="font-size: 0.7rem;">VER DETALLES</a>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+        }
+    });
+
+    // Función para volar al punto desde la lista
+    function centrarMapa(lat, lng) {
+        map.flyTo([lat, lng], 16, {
+            animate: true,
+            duration: 1.5 // Vuelo suave
+        });
+    }
+</script>
+
+<style>
+    /* Estilos adicionales para esta vista */
+    .incident-item:hover {
+        background: rgba(0, 212, 255, 0.1); /* Brillo cyan al pasar mouse */
+        border-left: 4px solid #00d4ff;
+    }
+    
+    .placeholder-dim::placeholder {
+        color: rgba(255,255,255,0.3);
+    }
+
+    /* Scrollbar personalizada invisible o fina */
+    .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.4);
+    }
+</style>
